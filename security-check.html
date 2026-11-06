@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>セキュリティ理解度チェックシート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/* レイアウト: 1カラムのシート。上に結果の要約、下に6分野×5問の選択式の問題と解説 */
+:root {
+  --bg: #f3f6f5;
+  --surface: #ffffff;
+  --ink: #14211e;
+  --muted: #55665f;
+  --line: #d5dedb;
+  --accent: #0b6e5f;
+  --accent-soft: #dcf0ea;
+  --good: #17703c;
+  --good-soft: #dff3e6;
+  --mid: #8a5a00;
+  --mid-soft: #fbefd2;
+  --bad: #b03a2e;
+  --bad-soft: #fbe3df;
+  --font-display: "Zen Kaku Gothic New", "Noto Sans JP", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  --font-body: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1614;
+    --surface: #16211f;
+    --ink: #e5eeeb;
+    --muted: #97aaa4;
+    --line: #283834;
+    --accent: #4fd1b5;
+    --accent-soft: #15372f;
+    --good: #6fd69a;
+    --good-soft: #173524;
+    --mid: #e8bb5c;
+    --mid-soft: #3a2f14;
+    --bad: #f29a8f;
+    --bad-soft: #3d1f1b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1614;
+  --surface: #16211f;
+  --ink: #e5eeeb;
+  --muted: #97aaa4;
+  --line: #283834;
+  --accent: #4fd1b5;
+  --accent-soft: #15372f;
+  --good: #6fd69a;
+  --good-soft: #173524;
+  --mid: #e8bb5c;
+  --mid-soft: #3a2f14;
+  --bad: #f29a8f;
+  --bad-soft: #3d1f1b;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: 64px; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.75;
+}
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.35; }
+p { margin: 0; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+/* 上部の固定バー */
+.bar {
+  position: sticky; top: 0; z-index: 10;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.bar-in {
+  max-width: 820px; margin: 0 auto; padding: 8px 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  font-size: .875rem; font-variant-numeric: tabular-nums;
+}
+.bar-in strong { font-weight: 700; }
+.bar-track { height: 4px; background: var(--line); }
+.bar-fill { height: 100%; width: 0; background: var(--accent); transition: width .25s ease; }
+
+.wrap { max-width: 820px; margin: 0 auto; padding: 32px 16px 80px; display: flex; flex-direction: column; gap: 28px; }
+
+.hero { display: flex; flex-direction: column; gap: 14px; }
+.hero h1 { font-size: clamp(1.6rem, 5vw, 2.2rem); font-weight: 900; }
+.lead { color: var(--muted); max-width: 40em; }
+.who { display: flex; flex-wrap: wrap; gap: 12px 20px; }
+.field { display: flex; flex-direction: column; gap: 2px; font-size: .8125rem; color: var(--muted); }
+.field input {
+  font: inherit; font-size: 1rem; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+  padding: 8px 12px; min-width: 14rem;
+}
+
+/* 要約 */
+.summary {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  padding: 20px; display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 24px;
+}
+.score-box { display: flex; flex-direction: column; gap: 4px; }
+.score-label { font-size: .8125rem; color: var(--muted); }
+.score-num { font-family: var(--font-display); font-weight: 900; font-size: 3.4rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.score-num small { font-size: 1rem; font-weight: 700; color: var(--muted); margin-left: 4px; }
+.score-sub { font-variant-numeric: tabular-nums; color: var(--muted); font-size: .875rem; }
+.level { margin-top: 6px; font-weight: 700; color: var(--accent); }
+.cats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.cat-btn {
+  width: 100%; display: grid; grid-template-columns: minmax(0, 11em) minmax(0, 1fr) 4.5em; gap: 12px; align-items: center;
+  background: none; border: 0; padding: 6px 4px; text-align: left; cursor: pointer; border-radius: 8px;
+  font-size: .875rem;
+}
+.cat-btn:hover { background: var(--accent-soft); }
+.track { height: 10px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.fill { height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .25s ease; }
+.num { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* 各分野 */
+.cat { display: flex; flex-direction: column; gap: 10px; }
+.cat-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 2px solid var(--ink); padding-bottom: 6px; }
+.cat-head h2 { font-size: 1.3rem; display: flex; align-items: baseline; gap: 10px; }
+.cat-no { font-size: .875rem; background: var(--ink); color: var(--bg); border-radius: 6px; padding: 0 8px; line-height: 1.7; }
+.cat-score { font-size: .875rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.cat-desc { color: var(--muted); font-size: .9375rem; }
+.items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.item {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px 16px; display: grid; grid-template-columns: 2.4rem minmax(0, 1fr); gap: 8px;
+  scroll-margin-top: 72px;
+}
+.item-no { font-size: .8125rem; color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 3px; }
+.item-body { display: flex; flex-direction: column; gap: 10px; }
+.q { font-weight: 500; }
+.opts { display: flex; flex-direction: column; gap: 6px; }
+.opt { position: relative; display: block; }
+.opt input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.opt input:disabled { cursor: default; }
+.opt > span {
+  display: flex; gap: 10px; align-items: baseline; padding: 8px 12px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--bg); font-size: .9375rem;
+}
+.opt-no { flex: none; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.opt input:not(:disabled):hover + span { border-color: var(--muted); }
+.opt input:checked + span { border-color: var(--accent); }
+.opt input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 2px; }
+.opt.is-correct > span { background: var(--good-soft); border-color: var(--good); color: var(--good); font-weight: 700; }
+.opt.is-correct > span::after { content: "○ 正解"; margin-left: auto; flex: none; font-size: .8125rem; white-space: nowrap; }
+.opt.is-wrong > span { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); font-weight: 700; }
+.opt.is-wrong > span::after { content: "× あなたの回答"; margin-left: auto; flex: none; font-size: .8125rem; white-space: nowrap; }
+.fb { border-radius: 8px; padding: 10px 12px; font-size: .9375rem; display: flex; flex-direction: column; gap: 4px; }
+.fb[hidden] { display: none; }
+.fb-head { font-weight: 700; }
+.fb-ok { background: var(--good-soft); }
+.fb-ok .fb-head { color: var(--good); }
+.fb-ng { background: var(--bad-soft); }
+.fb-ng .fb-head { color: var(--bad); }
+
+/* 復習 */
+.review { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.review h2 { font-size: 1.2rem; }
+.rv-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.rv {
+  width: 100%; text-align: left; background: none; border: 0; border-radius: 8px; padding: 6px 8px; cursor: pointer;
+  display: flex; gap: 10px; align-items: baseline; font-size: .9375rem;
+}
+.rv:hover { background: var(--accent-soft); }
+.tag { flex: none; font-size: .75rem; padding: 0 8px; border-radius: 99px; font-weight: 700; }
+.tag-0 { background: var(--bad-soft); color: var(--bad); }
+.tag-1 { background: var(--mid-soft); color: var(--mid); }
+.note { color: var(--muted); font-size: .9375rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn {
+  border: 1px solid var(--accent); background: var(--accent); color: var(--surface);
+  border-radius: 8px; padding: 8px 16px; cursor: pointer; font-weight: 700; font-size: .9375rem;
+}
+.btn.ghost { background: none; color: var(--accent); }
+.btn.warn { border-color: var(--bad); color: var(--bad); background: var(--bad-soft); }
+#out { width: 100%; min-height: 9rem; font: inherit; font-size: .875rem; padding: 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+#out[hidden] { display: none; }
+.status { font-size: .875rem; color: var(--accent); min-height: 1.5em; }
+
+@media (max-width: 640px) {
+  .summary { grid-template-columns: 1fr; gap: 16px; }
+  .cat-btn { grid-template-columns: minmax(0, 8em) minmax(0, 1fr) 4em; gap: 8px; }
+  .field input { min-width: 0; width: 100%; }
+  .field { flex: 1 1 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fill, .bar-fill { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="bar" id="bar">
+  <div class="bar-in">
+    <span>回答 <strong id="bar-ans">0</strong> / <span id="bar-total">30</span> 問</span>
+    <span>スコア <strong id="bar-pct">0%</strong></span>
+  </div>
+  <div class="bar-track"><div class="bar-fill" id="bar-fill"></div></div>
+</div>
+
+<main class="wrap">
+  <header class="hero">
+    <h1>セキュリティ理解度チェックシート</h1>
+    <p class="lead">全30問の選択式です。各問題の選択肢から1つ選ぶと、その場で正解と解説が表示されます。選んだあとは変更できません。やり直すときは、下の「回答をリセット」を使います。入力は、このブラウザに自動で保存されます。</p>
+    <div class="who">
+      <div class="field"><label for="in-name">名前</label><input id="in-name" type="text" autocomplete="off"></div>
+      <div class="field"><label for="in-date">日付</label><input id="in-date" type="date"></div>
+    </div>
+  </header>
+
+  <section class="summary" aria-labelledby="sum-h">
+    <div class="score-box">
+      <h2 id="sum-h" class="score-label" style="font-family:var(--font-body);font-weight:400">総合スコア</h2>
+      <div class="score-num"><span id="sum-score">0</span><small>/ <span id="sum-max">30</span> 問正解</small></div>
+      <p class="score-sub">達成率 <span id="sum-pct">0</span>% ・ 回答 <span id="sum-ans">0</span> / <span id="sum-total">30</span> 問</p>
+      <p class="level" id="sum-level"></p>
+    </div>
+    <ul class="cats" id="cat-list"></ul>
+  </section>
+
+  <div id="sheet"></div>
+
+  <section class="review" aria-labelledby="rv-h">
+    <h2 id="rv-h">復習する問題</h2>
+    <p class="note" id="rv-note"></p>
+    <ul class="rv-list" id="rv-list"></ul>
+    <div class="actions">
+      <button type="button" class="btn" id="btn-copy">結果をコピー</button>
+      <button type="button" class="btn ghost" id="btn-reset">回答をリセット</button>
+    </div>
+    <textarea id="out" readonly hidden aria-label="結果のテキスト"></textarea>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ===== 問題データ =====
+     q: 問題文 / c: 選択肢(よくある行動と正解) / a: 正解の番号(0始まり) / tip: 解説 */
+  var DATA = [
+    {
+      title: '基本の考え方',
+      desc: '用語の意味と、基本の考え方を確認します。',
+      items: [
+        { q: 'サーバーの障害で、必要なときにサービスが使えなくなった。情報セキュリティの3要素のうち、損なわれたのはどれか。',
+          c: ['機密性', '完全性', '可用性'], a: 2,
+          tip: '可用性は、必要なときに使えること。機密性は、許可された人だけが見られること。完全性は、情報が改ざん・破損されていないこと。対策の例は、サーバーの二重化とバックアップ。' },
+        { q: '更新していないソフトに、攻撃に使える弱点が見つかっている。この「弱点」を何と呼ぶか。',
+          c: ['脆弱性', '脅威', 'リスク'], a: 0,
+          tip: '弱点は脆弱性。脅威は害を与えるもの(攻撃者、マルウェア、災害など)。リスクは、脅威が脆弱性を突いて被害が出る可能性と、その大きさ。' },
+        { q: '「管理者です。確認のためにパスワードを教えてください」と電話があった。どうするか。',
+          c: ['管理者なら信頼できるので、教える。', '名前と部署を聞いて、答えられたら教える。', '教えない。本人確認が必要なら、自分で調べた正規の連絡先にかけ直す。'], a: 2,
+          tip: '名前や部署は、調べれば偽れる。人の心理のすきを突くこの手口を、ソーシャルエンジニアリングという。正規の担当者が電話でパスワードを聞くことはない。' },
+        { q: '「ウイルス対策ソフトを入れてあるから、他の対策はしなくてよい」という考え方について、正しいものはどれか。',
+          c: ['最新のソフトなら攻撃はすべて防げるので、その通り。', '1つの対策では足りない。更新・二段階認証・バックアップなどを重ねる(多層防御)。', 'ソフトが入っていれば、怪しいサイトを見ても問題ないので、その通り。'], a: 1,
+          tip: '1つの対策は、破られたり見逃したりすることがある。対策を重ねて、1つ破られても被害を抑える考え方を、多層防御という。' },
+        { q: '部活の共有フォルダに、メンバーの権限を付ける。適切なのはどれか。',
+          c: ['閲覧だけで足りる人は閲覧のみ、編集が必要な人だけ編集権限にする。', '管理が楽なので、全員に編集・削除の権限を付ける。', '全員を管理者にしておく。'], a: 0,
+          tip: '作業に必要な最小限の権限だけを与える(最小権限の原則)。権限が大きいほど、乗っ取りや操作ミスのときの被害が広がる。' }
+      ]
+    },
+    {
+      title: 'パスワードとアカウント',
+      desc: 'ログインを守る仕組みと、狙われ方を確認します。',
+      items: [
+        { q: '覚えやすいように、全てのサービスで同じ長いパスワードを使っている。この使い方について正しいものはどれか。',
+          c: ['長ければ安全なので、問題ない。', '1つのサービスから漏れると、他のサービスも乗っ取られる。サービスごとに変える。', '末尾の数字だけ変えれば、同じパスワードを使っても安全。'], a: 1,
+          tip: '漏れたIDとパスワードの組は、他のサービスで試される(パスワードリスト攻撃)。末尾だけ変えた程度では推測されやすい。サービスごとに別のパスワードにする。' },
+        { q: '二段階認証をオンにすると安全になるのはなぜか。',
+          c: ['ログインのたびに、パスワードが自動で変わるから。', 'パスワードが暗号化されて、漏れなくなるから。', 'パスワードが漏れても、2つ目の確認(認証アプリのコードなど)がないとログインできないから。'], a: 2,
+          tip: '2つ目の要素があれば、パスワードだけでは入れない。SMSのコードより、認証アプリやパスキーのほうが安全とされる。' },
+        { q: 'パスワードが多すぎて覚えられない。どうするのが良いか。',
+          c: ['パスワードマネージャーで、長くランダムなパスワードを作って管理する。', '覚えられるように、短く単純なものにそろえる。', 'スマホのメモ帳に、IDとパスワードを並べて書いておく。'], a: 0,
+          tip: 'パスワードマネージャーは、長くランダムなパスワードを作って保管できる。登録したサイトのドメインにだけ自動入力するので、偽サイトへの入力も防ぎやすい。メモ帳は、見られると全部漏れる。' },
+        { q: 'パスキーの説明として正しいものはどれか。',
+          c: ['パスワードを長くしたもの。', '端末の指紋・顔認証などで本人確認し、パスワードなしでログインする仕組み。偽サイトでは使えない。', '認証コードをSMSで受け取る仕組み。'], a: 1,
+          tip: '公開鍵暗号を使い、秘密鍵は端末に残ってサーバーには渡らない。偽サイトでは使えないので、フィッシングに強い。SMSで受け取るコードは、別の仕組み(二段階認証)。' },
+        { q: '他のサービスから漏れたIDとパスワードの組を使って、ログインを試す攻撃を何というか。',
+          c: ['ブルートフォース攻撃', 'フィッシング', 'パスワードリスト攻撃'], a: 2,
+          tip: 'パスワードリスト攻撃は、漏れた組を別のサービスで試す攻撃。ブルートフォース攻撃は、文字の組み合わせを総当たりで試す攻撃。フィッシングは、偽サイトで入力させて盗む手口。使い回しをやめると防ぎやすい。' }
+      ]
+    },
+    {
+      title: 'フィッシングと詐欺',
+      desc: 'だまされやすい場面と、気づいたときの動き方を確認します。',
+      items: [
+        { q: '「アカウントが停止されます。24時間以内に、こちらから確認してください」というメールが届いた。どうするか。',
+          c: ['急いでリンクを開いて、確認する。', 'リンクは開かず、公式アプリやブックマークから自分でログインして確認する。', 'メールに返信して、本物かどうか聞く。'], a: 1,
+          tip: '不安や焦りをあおるのは、フィッシングの典型。リンクは開かず、公式アプリやブックマークから確認する。返信すると、そのアドレスが使われていると相手に知らせることになる。' },
+        { q: 'ログイン画面のURLが https://shop.example.com.fake.jp/login だった。このサイトの運営元はどこか。',
+          c: ['example.com', 'shop.example.com', 'fake.jp'], a: 2,
+          tip: 'ホスト名を右から読み、.jp や .com の直前の名前までが運営元。ここでは fake.jp。example.com は、本物らしく見せるための飾り。' },
+        { q: 'ブラウザに「ウイルスに感染しました。今すぐ下の番号に電話してください」と表示された。どうするか。',
+          c: ['画面(タブ)を閉じる。閉じられなければ再起動する。電話もインストールもしない。', '表示された番号に電話して、指示に従う。', '指示されたセキュリティソフトを、その場でインストールする。'], a: 0,
+          tip: 'これは偽の警告(偽サポート詐欺)。電話をすると、遠隔操作や有料サポートを求められる。ブラウザの表示だけで、本当に感染したとは分からない。' },
+        { q: '駅のポスターのQRコードを読み取ると、ログイン画面が出てパスワードの入力を求められた。どうするか。',
+          c: ['公式サイトに見えるので、入力する。', '本物かどうか確かめるために、わざと間違ったパスワードを入れてみる。', '入力せずに閉じて、公式サイトのURLを自分で開き直す。'], a: 2,
+          tip: '本物のQRコードの上に、偽物を貼る手口がある。見ただけでは飛び先が分からない。間違った値でも、入力した内容は相手に送られる。' },
+        { q: '偽サイトにIDとパスワードを入力してしまったと気づいた。最初にすることは何か。',
+          c: ['様子を見て、被害が出たら対応する。', '同じパスワードを使っている全てのサービスで、パスワードを変更し、二段階認証を確認する。', 'そのサイトから届いたメールを削除して、忘れる。'], a: 1,
+          tip: '入力した情報は、すでに相手に渡っている。被害が出る前に、すぐ変更する。カード情報を入れたなら、カード会社にも連絡する。困ったら、家族・学校・消費者ホットライン188に相談する。' }
+      ]
+    },
+    {
+      title: 'マルウェアと端末',
+      desc: '感染を防ぐ判断と、端末を守る基本の習慣を確認します。',
+      items: [
+        { q: 'ネットからダウンロードした実行ファイル(.exe)を実行したい。どうするか。',
+          c: ['ウイルスチェックをして、問題が出なければ実行する。', '有名そうなサイトで見つけたので、安全だと考えて実行する。', '公式サイトなど、提供元が信頼できると確認できなければ実行しない。'], a: 2,
+          tip: 'ウイルス対策ソフトは、新しいマルウェアを見逃すことがあり、「問題なし」は安全の保証にならない。有名そうに見えるサイトでも、偽物や改ざんがある。提供元を確認できない実行ファイルは、実行しない。' },
+        { q: 'OSの更新通知が出ているが、作業中なので後回しにしている。この対応について正しいものはどれか。',
+          c: ['更新は動作が重くなるだけなので、ずっと放置してよい。', '更新には脆弱性の修正が含まれるので、早めに更新する。', 'ウイルス対策ソフトが入っていれば、更新しなくても同じ。'], a: 1,
+          tip: '更新には、見つかった脆弱性の修正が含まれる。古いままだと、その脆弱性を突く攻撃が成功しやすい。ウイルス対策ソフトは、更新の代わりにならない。' },
+        { q: '非公式サイトで、ゲームのチートツールや、有料ソフトの無料版(クラック版)を見つけた。どうするか。',
+          c: ['使わない。マルウェアが仕込まれていることがあり、入れた時点で端末や情報を奪われるおそれがある。', 'ウイルス対策ソフトを入れてあるので、ダウンロードして使う。', 'サブ端末なら重要な情報がないので、使っても問題ない。'], a: 0,
+          tip: '非公式の配布物には、マルウェアが仕込まれていることがある。ウイルス対策ソフトが見逃すこともある。サブ端末でも、同じネットワークや、ログインしたアカウントが狙われる。' },
+        { q: '大事なデータのバックアップは、どう取るのが良いか。',
+          c: ['同じPCの別フォルダにコピーしておく。', '外付けHDDに1つ取り、PCにつないだままにしておく。', '3つのコピーを、2種類の媒体に保存し、1つは別の場所(クラウドなど)に置く(3-2-1ルール)。'], a: 2,
+          tip: '同じPCや、つなぎっぱなしの外付けHDDは、故障やランサムウェアで一緒に失われる。3-2-1ルールなら、1か所がだめになっても戻せる。' },
+        { q: 'スマホを電車に置き忘れた。最初にすることは何か。',
+          c: ['「端末を探す」で位置確認とロックを行い、重要なアカウントのパスワードを変更する。', '画面ロックをかけてあるので、何もせずに見つかるのを待つ。', '新しいスマホを買って、古い端末はそのままにする。'], a: 0,
+          tip: '必要なら、遠隔でデータを消去する。携帯会社に連絡して、回線を止めることもできる。何もせず待つと、その間に不正に使われるおそれがある。' }
+      ]
+    },
+    {
+      title: 'ネットワークとWi-Fi',
+      desc: '通信の安全をどこまで保証できるかを確認します。',
+      items: [
+        { q: 'カフェの無料Wi-Fiで、ネットバンキングにログインして振込をしたい。どうするか。',
+          c: ['Wi-Fiにパスワードが付いているので、そのまま使う。', '重要な操作は避けて、テザリングなど自分のモバイル回線を使う。', 'アクセスポイント名が店名と同じなので、本物だと考えて使う。'], a: 1,
+          tip: '店名と同じ名前の偽アクセスポイントを作る手口がある。パスワードがあっても、同じ場所の人は同じパスワードで接続できる。重要な操作は、自分の回線で行う。' },
+        { q: 'ブラウザに鍵マーク(HTTPS)が出ているので、このサイトは安全で正規のサイトだ、という考え方について正しいものはどれか。',
+          c: ['鍵マークがあるサイトには、ウイルスがないので安全。', '鍵マークは運営者が信頼できる証明なので、その通り。', '鍵マークは、通信が暗号化されていることを示すだけ。フィッシングサイトにも付く。'], a: 2,
+          tip: 'HTTPSが保証するのは、通信の暗号化と、接続先が証明書の持ち主であること。運営者が信頼できるか、ウイルスがないかは保証しない。URLのドメインも確認する。' },
+        { q: 'VPNについて、正しいものはどれか。',
+          c: ['端末からVPNサーバーまでの通信を暗号化するが、ウイルス感染や詐欺サイトは防げない。', '使えば、VPN事業者にも通信を見られない。', '使えば、ウイルス感染も詐欺サイトも防げる。'], a: 0,
+          tip: 'VPNは、通信の暗号化と、接続元IPアドレスの隠蔽ができる。マルウェアやフィッシングを防ぐ機能ではない。VPN事業者自身は、通信を見られる立場にある。' },
+        { q: '買ったWi-Fiルーターを、管理パスワードも初期設定のまま使っている。どうするのが良いか。',
+          c: ['Wi-Fiのパスワードがあるので、初期設定のままで問題ない。', '管理画面は自分しか開かないので、初期の管理パスワードのままでよい。', '初期の管理パスワードを変更し、ファームウェアを更新し、暗号化にWPA2かWPA3を使う。'], a: 2,
+          tip: '初期の管理パスワードは、機種ごとに知られていることがある。ファームウェアの更新で脆弱性を直し、WEPは使わず、WPA2またはWPA3にする。' },
+        { q: 'ファイアウォールの役割はどれか。',
+          c: ['通信を、決めたルールで許可・遮断する。', '端末内のウイルスを見つけて削除する。', 'パスワードを自動で作って管理する。'], a: 0,
+          tip: '外からの不要な接続を止めたり、内側からの不審な外部通信を制限したりする。ウイルスの検出・削除はウイルス対策ソフト、パスワードの管理はパスワードマネージャーの役割。' }
+      ]
+    },
+    {
+      title: 'SNSと個人情報',
+      desc: '公開した情報から何が分かるかを確認します。',
+      items: [
+        { q: 'SNSに、制服の写真、学校名の入ったバッグ、最寄り駅の話を、別々の投稿でのせている。この状況について正しいものはどれか。',
+          c: ['それぞれ1つずつなら個人情報ではないので、問題ない。', '組み合わせると、学校や居住地域が特定されるおそれがある。内容と公開範囲を見直す。', '名前を書いていなければ、個人が特定されることはない。'], a: 1,
+          tip: '1つずつは無害に見えても、組み合わせると個人が特定されることがある。投稿の時間帯や背景も手がかりになる。' },
+        { q: '自宅の窓から見える景色の写真を投稿したい。位置情報はオフにした。この状況について正しいものはどれか。',
+          c: ['位置情報をオフにしたので、場所は特定されない。', '写真を小さくすれば、場所は特定されない。', '背景の建物・看板・景色などから、場所が特定されることがある。写っているものを確認する。'], a: 2,
+          tip: '写真に入る位置情報(Exif)を消しても、背景の建物、看板、目に映る景色、影の向きから、場所は推測される。' },
+        { q: 'SNSを始めたばかり。最初にすることはどれか。',
+          c: ['投稿の公開範囲、タグ付け、プロフィールの公開項目を確認する。', 'フォロワーを増やすために、全て公開にしておく。', '運営が安全にしてくれているので、設定は初期状態のままにする。'], a: 0,
+          tip: '初期設定は、使いやすさを優先して、公開寄りになっていることがある。公開範囲、タグ付けの許可、フォロワーの承認、検索への表示を自分で決める。' },
+        { q: '昔ゲームのために連携したアプリが、使っていないのに残っている。どうするか。',
+          c: ['使っていなければ何もされないので、放置する。', '連携を解除する。投稿や連絡先などの権限を渡したままになっている。', 'アプリを端末から削除すれば、連携も消える。'], a: 1,
+          tip: 'アプリを削除しても、アカウント側の連携と権限は残る。アカウントの設定から、使っていない連携を解除する。' },
+        { q: '恥ずかしい投稿をしてしまい、すぐに削除した。この状況について正しいものはどれか。',
+          c: ['削除したので、もう残らない。', '数日たてば、検索結果からも必ず消える。', 'スクリーンショットや転載、アーカイブで残っている可能性がある。投稿前に、公開してよいか考える。'], a: 2,
+          tip: '一度公開した情報は、複製や転載で残り続けることがある(デジタルタトゥー)。投稿する前に確認するのが、最も確実。' }
+      ]
+    }
+  ];
+
+  var KEY = 'security-check-sheet-v2';
+  var TOTAL = 0;
+  DATA.forEach(function (c) { TOTAL += c.items.length; });
+  var MAX = TOTAL; /* 1問正解で1点 */
+
+  var state = { name: '', date: '', answers: {} };
+
+  /* ===== 保存と読み込み(保存できない環境でも動く) ===== */
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      var o = JSON.parse(raw);
+      if (o && typeof o === 'object') {
+        if (typeof o.name === 'string') state.name = o.name;
+        if (typeof o.date === 'string') state.date = o.date;
+        if (o.answers && typeof o.answers === 'object') state.answers = o.answers;
+      }
+    } catch (e) { /* 保存データが無い・壊れている場合は何もしない */ }
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* 保存できなくても続ける */ }
+  }
+  function today() {
+    var d = new Date();
+    function p(n) { return String(n).padStart(2, '0'); }
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  }
+  function $(id) { return document.getElementById(id); }
+  function smooth() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+  }
+  /* "q3-2" から、分野の番号・問題の番号・問題データを取り出す */
+  function parseId(id) {
+    var m = /^q(\d+)-(\d+)$/.exec(id);
+    if (!m) return null;
+    var c = DATA[Number(m[1])];
+    if (!c) return null;
+    var it = c.items[Number(m[2])];
+    if (!it) return null;
+    return { ci: Number(m[1]), ii: Number(m[2]), item: it };
+  }
+  /* 保存された回答が、その問題の選択肢の範囲内かを確認する */
+  function validAnswer(p, v) {
+    return typeof v === 'number' && v >= 0 && v < p.item.c.length && Math.floor(v) === v;
+  }
+
+  /* ===== 画面の組み立て ===== */
+  function buildSheet() {
+    $('sheet').innerHTML = DATA.map(function (c, ci) {
+      var items = c.items.map(function (it, ii) {
+        var id = 'q' + ci + '-' + ii;
+        var opts = it.c.map(function (text, k) {
+          return '<label class="opt"><input type="radio" name="' + id + '" value="' + k + '"><span><b class="opt-no">' + (k + 1) + '.</b><span class="opt-text">' + text + '</span></span></label>';
+        }).join('');
+        return '<li class="item" id="item-' + id + '">' +
+          '<span class="item-no">Q' + (ii + 1) + '</span>' +
+          '<div class="item-body">' +
+          '<p class="q" id="lbl-' + id + '">' + it.q + '</p>' +
+          '<div class="opts" role="radiogroup" aria-labelledby="lbl-' + id + '">' + opts + '</div>' +
+          '<div class="fb" id="fb-' + id + '" hidden></div>' +
+          '</div></li>';
+      }).join('');
+      return '<section class="cat" id="cat-' + ci + '" aria-labelledby="cat-h-' + ci + '">' +
+        '<div class="cat-head"><h2 id="cat-h-' + ci + '"><span class="cat-no">' + (ci + 1) + '</span>' + c.title + '</h2>' +
+        '<span class="cat-score" id="cat-score-' + ci + '"></span></div>' +
+        '<p class="cat-desc">' + c.desc + '</p>' +
+        '<ol class="items">' + items + '</ol></section>';
+    }).join('');
+
+    $('cat-list').innerHTML = DATA.map(function (c, ci) {
+      return '<li><button type="button" class="cat-btn" data-cat="' + ci + '">' +
+        '<span>' + (ci + 1) + ' ' + c.title + '</span>' +
+        '<span class="track"><span class="fill" id="fill-' + ci + '" style="display:block"></span></span>' +
+        '<span class="num" id="num-' + ci + '">0 / ' + c.items.length + '</span></button></li>';
+    }).join('');
+  }
+
+  /* 回答した問題の、正誤と解説を表示して、選択肢を固定する */
+  function showResult(id) {
+    var p = parseId(id);
+    var item = $('item-' + id);
+    if (!p || !item) return;
+    var k = state.answers[id];
+    if (!validAnswer(p, k)) return;
+    var ok = (k === p.item.a);
+    item.querySelectorAll('input').forEach(function (el) { el.disabled = true; });
+    item.querySelectorAll('.opt').forEach(function (lab, idx) {
+      lab.classList.toggle('is-correct', idx === p.item.a);
+      lab.classList.toggle('is-wrong', idx === k && !ok);
+    });
+    var chosen = item.querySelector('input[value="' + k + '"]');
+    if (chosen) chosen.checked = true;
+    var fb = $('fb-' + id);
+    fb.className = 'fb ' + (ok ? 'fb-ok' : 'fb-ng');
+    fb.innerHTML = '<p class="fb-head">' + (ok ? '正解' : '不正解。正解は ' + (p.item.a + 1) + ' です') + '</p><p>' + p.item.tip + '</p>';
+    fb.hidden = false;
+  }
+
+  function restoreAnswers() {
+    Object.keys(state.answers).forEach(function (id) { showResult(id); });
+  }
+
+  /* ===== 集計 ===== */
+  function calc() {
+    var sum = 0, answered = 0;
+    var cats = DATA.map(function (c, ci) {
+      var s = 0, a = 0;
+      c.items.forEach(function (it, ii) {
+        var v = state.answers['q' + ci + '-' + ii];
+        if (validAnswer({ item: it }, v)) {
+          a++;
+          if (v === it.a) s++;
+        }
+      });
+      sum += s; answered += a;
+      return { s: s, a: a, n: c.items.length };
+    });
+    return { sum: sum, answered: answered, cats: cats };
+  }
+
+  function levelText(pct) {
+    if (pct >= 85) return 'よく理解できています';
+    if (pct >= 65) return '基礎は身についています';
+    if (pct >= 40) return '復習すると伸びます';
+    return 'まず基本から確認しましょう';
+  }
+
+  /* まちがえた問題の一覧 */
+  function reviewItems() {
+    var list = [];
+    DATA.forEach(function (c, ci) {
+      c.items.forEach(function (it, ii) {
+        var id = 'q' + ci + '-' + ii;
+        var v = state.answers[id];
+        if (validAnswer({ item: it }, v) && v !== it.a) {
+          list.push({ id: id, q: it.q, no: c.title + ' Q' + (ii + 1) });
+        }
+      });
+    });
+    return list;
+  }
+
+  /* ===== 表示の更新 ===== */
+  function update() {
+    var r = calc();
+    var pct = Math.round(r.sum / MAX * 100);
+    var left = TOTAL - r.answered;
+
+    $('bar-ans').textContent = r.answered;
+    $('bar-pct').textContent = pct + '%';
+    $('bar-fill').style.width = (r.answered / TOTAL * 100) + '%';
+
+    $('sum-score').textContent = r.sum;
+    $('sum-pct').textContent = pct;
+    $('sum-ans').textContent = r.answered;
+    $('sum-level').textContent = left === 0 ? levelText(pct) : 'あと' + left + '問で判定が出ます';
+
+    r.cats.forEach(function (c, ci) {
+      $('fill-' + ci).style.width = (c.s / c.n * 100) + '%';
+      $('num-' + ci).textContent = c.s + ' / ' + c.n;
+      $('cat-score-' + ci).textContent = c.s + ' / ' + c.n + ' 問正解(回答 ' + c.a + ' / ' + c.n + ')';
+    });
+
+    var rv = reviewItems();
+    var note = $('rv-note');
+    if (r.answered === 0) {
+      note.textContent = 'まだ回答していません。問題に答えると、ここにまちがえた問題が出ます。';
+    } else if (rv.length === 0) {
+      note.textContent = left === 0 ? 'すべて正解です。復習が必要な問題はありません。' : '回答した問題は、すべて正解です。未回答が' + left + '問あります。';
+    } else {
+      note.textContent = 'まちがえた問題です。押すと、その問題に移動します。' + (left > 0 ? '未回答が' + left + '問あります。' : '');
+    }
+    $('rv-list').innerHTML = rv.map(function (x) {
+      return '<li><button type="button" class="rv" data-id="' + x.id + '">' +
+        '<span class="tag tag-0">不正解</span>' +
+        '<span>' + x.no + ' ' + x.q + '</span></button></li>';
+    }).join('');
+  }
+
+  function resultText() {
+    var r = calc();
+    var pct = Math.round(r.sum / MAX * 100);
+    var lines = [];
+    lines.push('セキュリティ理解度チェック結果');
+    lines.push('名前: ' + (state.name || '(未入力)') + '  日付: ' + (state.date || '(未入力)'));
+    lines.push('総合: ' + r.sum + ' / ' + MAX + ' 問正解(' + pct + '%)  回答 ' + r.answered + ' / ' + TOTAL + ' 問');
+    if (r.answered === TOTAL) lines.push('判定: ' + levelText(pct));
+    lines.push('');
+    lines.push('分野別');
+    DATA.forEach(function (c, ci) {
+      lines.push('- ' + c.title + ': ' + r.cats[ci].s + ' / ' + c.items.length);
+    });
+    var rv = reviewItems();
+    if (rv.length) {
+      lines.push('');
+      lines.push('復習する問題');
+      rv.forEach(function (x) { lines.push('- ' + x.no + ' ' + x.q); });
+    }
+    return lines.join('\n');
+  }
+
+  /* ===== 操作 ===== */
+  function init() {
+    load();
+    if (!state.date) state.date = today();
+    buildSheet();
+    restoreAnswers();
+    $('bar-total').textContent = TOTAL;
+    $('sum-total').textContent = TOTAL;
+    $('sum-max').textContent = MAX;
+    $('in-name').value = state.name;
+    $('in-date').value = state.date;
+
+    $('in-name').addEventListener('input', function (e) { state.name = e.target.value; save(); });
+    $('in-date').addEventListener('input', function (e) { state.date = e.target.value; save(); });
+
+    /* 選択肢を選んだら、保存して正誤を表示する */
+    $('sheet').addEventListener('change', function (e) {
+      var t = e.target;
+      if (t && t.matches && t.matches('input[type="radio"]')) {
+        state.answers[t.name] = Number(t.value);
+        save();
+        showResult(t.name);
+        update();
+      }
+    });
+
+    $('cat-list').addEventListener('click', function (e) {
+      var b = e.target.closest('.cat-btn');
+      if (!b) return;
+      var sec = $('cat-' + b.getAttribute('data-cat'));
+      if (sec) sec.scrollIntoView({ behavior: smooth(), block: 'start' });
+    });
+
+    $('rv-list').addEventListener('click', function (e) {
+      var b = e.target.closest('.rv');
+      if (!b) return;
+      var item = $('item-' + b.getAttribute('data-id'));
+      if (item) item.scrollIntoView({ behavior: smooth(), block: 'center' });
+    });
+
+    $('btn-copy').addEventListener('click', function () {
+      var text = resultText();
+      var out = $('out');
+      var status = $('status');
+      function fallback() {
+        // コピーが許可されない環境では、文字を表示して手動でコピーしてもらう
+        out.value = text;
+        out.hidden = false;
+        out.focus();
+        out.select();
+        status.textContent = '自動コピーできませんでした。下の文章を選択してコピーしてください。';
+      }
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () {
+            out.hidden = true;
+            status.textContent = '結果をコピーしました。';
+          }, fallback);
+        } else {
+          fallback();
+        }
+      } catch (err) {
+        fallback();
+      }
+    });
+
+    var resetBtn = $('btn-reset');
+    var timer = null;
+    resetBtn.addEventListener('click', function () {
+      if (!resetBtn.classList.contains('warn')) {
+        // 1回目: 確認の表示に変える
+        resetBtn.classList.add('warn');
+        resetBtn.textContent = 'もう一度押すと全ての回答を消します';
+        timer = setTimeout(function () {
+          resetBtn.classList.remove('warn');
+          resetBtn.textContent = '回答をリセット';
+        }, 4000);
+        return;
+      }
+      // 2回目: 実際にリセット(選択肢の固定も解除する)
+      clearTimeout(timer);
+      resetBtn.classList.remove('warn');
+      resetBtn.textContent = '回答をリセット';
+      state.answers = {};
+      document.querySelectorAll('#sheet input[type="radio"]').forEach(function (el) {
+        el.checked = false;
+        el.disabled = false;
+      });
+      document.querySelectorAll('#sheet .opt').forEach(function (lab) {
+        lab.classList.remove('is-correct', 'is-wrong');
+      });
+      document.querySelectorAll('#sheet .fb').forEach(function (fb) {
+        fb.hidden = true;
+        fb.innerHTML = '';
+      });
+      save();
+      update();
+      $('out').hidden = true;
+      $('status').textContent = '回答をリセットしました。';
+    });
+
+    update();
+  }
+
+  try { init(); } catch (err) {
+    var s = document.getElementById('status');
+    if (s) s.textContent = '画面の準備でエラーが起きました。ページを再読み込みしてください。';
+  }
+})();
+</script>
+</body>
+</html>
